@@ -3,6 +3,7 @@ package cobranca
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 )
@@ -52,6 +53,11 @@ func (b Boleto) Validate() error {
 }
 
 func (b Boleto) MarshalJSON() ([]byte, error) {
+	prefix := fmt.Sprintf("000%s", b.NumeroConvenio)
+	if !strings.HasPrefix(b.NumeroTituloCliente, prefix) {
+		b.NumeroTituloCliente = NossoNumero(b.NumeroConvenio, b.NumeroTituloCliente)
+	}
+
 	type Alias Boleto
 	return json.Marshal(&struct {
 		Alias
@@ -64,6 +70,7 @@ func (b Boleto) MarshalJSON() ([]byte, error) {
 	})
 }
 
+// RegistroBoleto é o retorno ao registar boleto
 type RegistroBoleto struct {
 	Numero                 string `json:"numero"`
 	NumeroCarteira         int    `json:"numeroCarteira"`
@@ -88,16 +95,55 @@ type RegistroBoleto struct {
 	//"listaOcorrenciasNegativacao": []
 }
 
+// Desconto que será concedido no boleto
+// Se tipo > 0, definir uma data de expiração do desconto, no formato "dd.mm.aaaa".
+// Se tipo = 1, definir um valor de desconto >= 0.00 (formato decimal separado por ".").
+// Se tipo = 2, definir uma porcentagem de desconto >= 0.00 (formato decimal separado por ".").
 type Desconto struct {
-	Tipo TipoDesconto `json:"tipo"`
+	Tipo          TipoDesconto `json:"tipo"`
+	DataExpiracao time.Time    `json:"dataExpiracao"`
+	Porcentagem   float64      `json:"porcentagem"`
+	Valor         float64      `json:"valor"`
 }
 
+func (d Desconto) MarshalJSON() ([]byte, error) {
+	type Alias Desconto
+	return json.Marshal(&struct {
+		Alias
+		DataExpiracao string `json:"dataExpiracao"`
+	}{
+		Alias:         (Alias)(d),
+		DataExpiracao: d.DataExpiracao.Format("02.01.2006"),
+	})
+}
+
+// JurosMora define o valor de Juros que incide sobre o valor atual do boleto (valor do boleto - valor de abatimento)
+// Se tipo = 1, definir um valor de desconto >= 0.00 (formato decimal separado por ".")
+// Se tipo = 2, definir uma porcentagem de desconto >= 0.00 (formato decimal separado por ".")
 type JurosMora struct {
-	Tipo TipoJurosMora `json:"jurosMora"`
+	Tipo        TipoJurosMora `json:"tipo"`
+	Porcentagem float64       `json:"porcentagem"`
+	Valor       float64       `json:"valor"`
 }
 
+// Multa define o valor da Multa que incide sobre o valor atual do boleto (valor do boleto - valor de abatimento).
+// Se tipo = 0 (zero) os campos “DATA DE MULTA”, “PERCENTUAL DE MULTA” e “VALOR DA MULTA” não devem ser informados ou ser informados iguais a ‘0’ (zero).
 type Multa struct {
-	Tipo TipoMulta `json:"multa"`
+	Tipo        TipoMulta `json:"tipo"`
+	Data        time.Time `json:"data"`
+	Porcentagem float64   `json:"porcentagem"`
+	Valor       float64   `json:"valor"`
+}
+
+func (m Multa) MarshalJSON() ([]byte, error) {
+	type Alias Multa
+	return json.Marshal(&struct {
+		Alias
+		Data string `json:"data"`
+	}{
+		Alias: (Alias)(m),
+		Data:  m.Data.Format("02.01.2006"),
+	})
 }
 
 type Avalista struct {
