@@ -101,19 +101,24 @@ type RegistroBoleto struct {
 // Se tipo = 2, definir uma porcentagem de desconto >= 0.00 (formato decimal separado por ".").
 type Desconto struct {
 	Tipo          TipoDesconto `json:"tipo"`
-	DataExpiracao time.Time    `json:"dataExpiracao"`
-	Porcentagem   float64      `json:"porcentagem"`
-	Valor         float64      `json:"valor"`
+	DataExpiracao time.Time    `json:"dataExpiracao,omitempty"`
+	Porcentagem   float64      `json:"porcentagem,omitempty"`
+	Valor         float64      `json:"valor,omitempty"`
 }
 
 func (d Desconto) MarshalJSON() ([]byte, error) {
+	var data string
+	if !d.DataExpiracao.IsZero() {
+		data = d.DataExpiracao.Format("02.01.2006")
+	}
+
 	type Alias Desconto
 	return json.Marshal(&struct {
 		Alias
-		DataExpiracao string `json:"dataExpiracao"`
+		DataExpiracao string `json:"dataExpiracao,omitempty"`
 	}{
 		Alias:         (Alias)(d),
-		DataExpiracao: d.DataExpiracao.Format("02.01.2006"),
+		DataExpiracao: data,
 	})
 }
 
@@ -122,27 +127,32 @@ func (d Desconto) MarshalJSON() ([]byte, error) {
 // Se tipo = 2, definir uma porcentagem de desconto >= 0.00 (formato decimal separado por ".")
 type JurosMora struct {
 	Tipo        TipoJurosMora `json:"tipo"`
-	Porcentagem float64       `json:"porcentagem"`
-	Valor       float64       `json:"valor"`
+	Porcentagem float64       `json:"porcentagem,omitempty"`
+	Valor       float64       `json:"valor,omitempty"`
 }
 
 // Multa define o valor da Multa que incide sobre o valor atual do boleto (valor do boleto - valor de abatimento).
 // Se tipo = 0 (zero) os campos “DATA DE MULTA”, “PERCENTUAL DE MULTA” e “VALOR DA MULTA” não devem ser informados ou ser informados iguais a ‘0’ (zero).
 type Multa struct {
 	Tipo        TipoMulta `json:"tipo"`
-	Data        time.Time `json:"data"`
-	Porcentagem float64   `json:"porcentagem"`
-	Valor       float64   `json:"valor"`
+	Data        time.Time `json:"data,omitempty"`
+	Porcentagem float64   `json:"porcentagem,omitempty"`
+	Valor       float64   `json:"valor,omitempty"`
 }
 
 func (m Multa) MarshalJSON() ([]byte, error) {
+	var data string
+	if !m.Data.IsZero() {
+		data = m.Data.Format("02.01.2006")
+	}
+
 	type Alias Multa
 	return json.Marshal(&struct {
 		Alias
-		Data string `json:"data"`
+		Data string `json:"data,omitempty"`
 	}{
 		Alias: (Alias)(m),
-		Data:  m.Data.Format("02.01.2006"),
+		Data:  data,
 	})
 }
 
