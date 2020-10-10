@@ -2,7 +2,7 @@ package cobranca
 
 import (
 	"encoding/json"
-	"fmt"
+	"net/http"
 	"net/url"
 
 	"github.com/martinusso/bb-sdk-go"
@@ -23,24 +23,6 @@ func NewClient(cc bb.ClientCredentials) client {
 		cc: cc}
 }
 
-func (c client) BaixarBoleto(numero string) error {
-	cred := rest.Credentials{
-		Bearer:   c.cc.Token,
-		AppKey:   c.cc.AppKey,
-		Endpoint: c.endpoint(),
-	}
-	params := url.Values{}
-
-	path := fmt.Sprintf("/boletos/%s/baixar", numero)
-
-	res, err := rest.NewClient(cred, params).Post(path, nil)
-	if err != nil {
-		return err
-	}
-	fmt.Println(string(res.Body))
-	return nil
-}
-
 func (c client) ListarBoletos(p ListaBoletosParams) (boletos BoletosListagem, err error) {
 	cred := rest.Credentials{
 		Bearer:   c.cc.Token,
@@ -52,8 +34,18 @@ func (c client) ListarBoletos(p ListaBoletosParams) (boletos BoletosListagem, er
 	if err != nil {
 		return
 	}
-	err = json.Unmarshal(res.Body, &boletos)
-	return
+
+	if res.Code == http.StatusOK {
+		err = json.Unmarshal(res.Body, &boletos)
+		return
+	}
+
+	var cobErr *ErrorListaBoletos
+	err = json.Unmarshal(res.Body, &cobErr)
+	if err != nil {
+		return
+	}
+	return boletos, cobErr
 }
 
 func (c client) RegistrarBoleto(b Boleto) (boleto RegistroBoleto, err error) {
@@ -75,8 +67,18 @@ func (c client) RegistrarBoleto(b Boleto) (boleto RegistroBoleto, err error) {
 	if err != nil {
 		return
 	}
-	err = json.Unmarshal(res.Body, &boleto)
-	return
+
+	if res.Code == http.StatusCreated {
+		err = json.Unmarshal(res.Body, &boleto)
+		return
+	}
+
+	var cobErr *bb.ErrorBB
+	err = json.Unmarshal(res.Body, &cobErr)
+	if err != nil {
+		return
+	}
+	return boleto, cobErr
 }
 
 func (c client) endpoint() string {

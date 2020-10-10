@@ -9,8 +9,7 @@ import (
 
 const (
 	endpointAuthTokenStaging = "https://oauth.hm.bb.com.br"
-	endpointAuthToken        = "https://oauth.desenv.bb.com.br"
-	oAuthToken               = "/oauth/token"
+	endpointAuthToken        = "https://oauth.bb.com.br"
 )
 
 type OAuth struct {
@@ -25,7 +24,7 @@ func (o OAuth) Bearer(basic string) (response OAuthResponse, err error) {
 	params := url.Values{}
 	params.Set("grant_type", "client_credentials")
 	params.Set("scope", "cobrancas.boletos-requisicao cobrancas.boletos-info")
-	res, err := rest.NewClient(c, params).FormData(oAuthToken)
+	res, err := rest.NewClient(c, params).FormData("/oauth/token")
 	if err != nil {
 		return
 	}

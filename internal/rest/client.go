@@ -70,7 +70,6 @@ func (r restClient) Post(path string, value interface{}) (Response, error) {
 
 func (r restClient) send(method, path, contentType string, body io.Reader) (Response, error) {
 	url := r.credentials.Endpoint + path
-	fmt.Println(url)
 
 	req, err := http.NewRequest(method, url, body)
 	if err != nil {

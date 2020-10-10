@@ -2,6 +2,7 @@ package cobranca
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/url"
 	"strconv"
 	"time"
@@ -45,6 +46,32 @@ func (b *BoletosListagemItem) UnmarshalJSON(data []byte) error {
 	b.DataVencimento, _ = time.Parse("02.01.2006", aux.DataVencimento)
 	b.DataMovimento, _ = time.Parse("02.01.2006", aux.DataMovimento)
 	return nil
+}
+
+type ErrorListaBoletos struct {
+	Errors []struct {
+		CodigoMensagem string `json:"codigoMensagem"`
+		VersaoMensagem string `json:"versaoMensagem"`
+		TextoMensagem  string `json:"textoMensagem"`
+		CodigoRetorno  string `json:"codigoRetorno"`
+	} `json:"erros"`
+}
+
+func (e *ErrorListaBoletos) Error() string {
+	if len(e.Errors) > 0 {
+		f := e.Errors[0]
+		return f.TextoMensagem
+	}
+	return ""
+}
+
+func (e ErrorListaBoletos) Codigo() string {
+	if len(e.Errors) > 0 {
+		f := e.Errors[0]
+		return fmt.Sprintf("%v.%v",
+			f.CodigoMensagem, f.VersaoMensagem)
+	}
+	return ""
 }
 
 type ListaBoletosParams struct {
@@ -104,13 +131,13 @@ func (p ListaBoletosParams) Values() map[string][]string {
 		params.Set("dataFimVencimento", p.DataFimVencimento.Format("02.01.2006"))
 	}
 	if !p.DataInicioRegistro.IsZero() {
-		params.Set("dataFimRegistro", p.DataFimRegistro.Format("02.01.2006"))
+		params.Set("dataInicioRegistro", p.DataInicioRegistro.Format("02.01.2006"))
 	}
 	if !p.DataFimRegistro.IsZero() {
 		params.Set("dataFimRegistro", p.DataFimRegistro.Format("02.01.2006"))
 	}
 	if !p.DataInicioMovimento.IsZero() {
-		params.Set("dataFimMovimento", p.DataFimMovimento.Format("02.01.2006"))
+		params.Set("dataInicioMovimento", p.DataInicioMovimento.Format("02.01.2006"))
 	}
 	if !p.DataFimMovimento.IsZero() {
 		params.Set("dataFimMovimento", p.DataFimMovimento.Format("02.01.2006"))
