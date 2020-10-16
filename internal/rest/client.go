@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 )
 
 type Credentials struct {
@@ -79,7 +80,7 @@ func (r restClient) send(method, path, contentType string, body io.Reader) (Resp
 	req.Header.Add("Content-type", contentType)
 	req.Header.Add("Authorization", r.credentials.Token())
 
-	httpClient := &http.Client{}
+	httpClient := &http.Client{Timeout: 15 * time.Second}
 	res, err := httpClient.Do(req)
 	if err != nil {
 		return Response{}, err
