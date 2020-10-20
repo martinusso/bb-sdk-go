@@ -2,6 +2,7 @@ package cobranca
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/url"
 
@@ -21,6 +22,41 @@ type client struct {
 func NewClient(cc bb.ClientCredentials) client {
 	return client{
 		cc: cc}
+}
+
+func (c client) BaixarBoleto(numeroConvenio, nossoNumero string) (baixa RetornoBaixa, err error) {
+	cred := rest.Credentials{
+		Bearer:   c.cc.Token,
+		AppKey:   c.cc.AppKey,
+		Endpoint: c.endpoint(),
+	}
+	params := url.Values{}
+
+	path := fmt.Sprintf("/boletos/%s/baixar", nossoNumero)
+
+	payload := struct {
+		NumeroConvenio string `json:"numeroConvenio"`
+	}{
+		NumeroConvenio: numeroConvenio,
+	}
+
+	res, err := rest.NewClient(cred, params).Post(path, payload)
+	if err != nil {
+		return
+	}
+
+	if res.Code == http.StatusOK {
+		err = json.Unmarshal(res.Body, &baixa)
+		return
+	}
+
+	var cobErr *ErrorBaixaBoleto
+	err = json.Unmarshal(res.Body, &cobErr)
+	if err != nil {
+		return
+	}
+	err = cobErr
+	return
 }
 
 func (c client) ListarBoletos(p ListaBoletosParams) (boletos BoletosListagem, err error) {
