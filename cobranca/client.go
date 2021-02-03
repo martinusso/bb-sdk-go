@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	endpointCobrancasStaging = "https://api.hm.bb.com.br/cobrancas/v1"
-	endpointCobrancasProd    = "https://api.bb.com.br/cobrancas/v1"
+	endpointCobrancasStaging = "https://api.hm.bb.com.br/cobrancas/v2"
+	endpointCobrancasProd    = "https://api.bb.com.br/cobrancas/v2"
 )
 
 type client struct {

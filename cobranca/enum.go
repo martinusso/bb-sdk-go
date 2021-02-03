@@ -40,6 +40,19 @@ const (
 	NaoVencido BoletoVencido = "N"
 )
 
+// IndicadorPix informa se o boleto terá um QRCode Pix atrelado.
+// Se informado caracter inválido,  assumirá 'N'.
+// Domínios:
+// 'S' - QRCODE DINAMICO;
+// 'N' - SEM PIX;
+// OUTRO - SEM PIX
+type IndicadorPix string
+
+const (
+	IndicadorPixSim IndicadorPix = "S"
+	IndicadorPixNao IndicadorPix = "N"
+)
+
 // IndicadorSituacao indica a situação do boleto, sendo:
 // A - boletos em ser
 // B - boletos liquidados/baixados/protestados
@@ -91,10 +104,10 @@ const (
 // TipoRegistro indica o tipo do registro do pagador, sendo:
 // 1 - Pessoa Física
 // 2 - Pessoa Jurídica
-type TipoRegistro int
+type TipoInscricao int
 
 const (
-	PessoaFisica TipoRegistro = iota + 1
+	PessoaFisica TipoInscricao = iota + 1
 	PessoaJuridica
 )
 
