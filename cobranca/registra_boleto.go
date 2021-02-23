@@ -9,32 +9,32 @@ import (
 )
 
 type Boleto struct {
-	NumeroConvenio                       string           `json:"numeroConvenio"`
-	NumeroCarteira                       int              `json:"numeroCarteira"`
-	NumeroVariacaoCarteira               int              `json:"numeroVariacaoCarteira"`
-	CodigoModalidade                     CodigoModalidade `json:"codigoModalidade"`
-	DataEmissao                          time.Time        `json:"dataEmissao"`
-	DataVencimento                       time.Time        `json:"dataVencimento"`
-	ValorOriginal                        float64          `json:"valorOriginal"`
-	ValorAbatimento                      float64          `json:"valorAbatimento"`
-	QuantidadeDiasProtesto               int              `json:"quantidadeDiasProtesto"`
-	IndicadorNumeroDiasLimiteRecebimento string           `json:"indicadorNumeroDiasLimiteRecebimento"`
-	NumeroDiasLimiteRecebimento          int              `json:"numeroDiasLimiteRecebimento"`
-	CodigoAceite                         CodigoAceite     `json:"codigoAceite"`
-	CodigoTipoTitulo                     string           `json:"codigoTipoTitulo"`
-	DescricaoTipoTitulo                  string           `json:"descricaoTipoTitulo"`
-	IndicadorPermissaoRecebimentoParcial string           `json:"indicadorPermissaoRecebimentoParcial"`
-	NumeroTituloBeneficiario             string           `json:"numeroTituloBeneficiario"`
-	TextoCampoUtilizacaoBeneficiario     string           `json:"textoCampoUtilizacaoBeneficiario"`
-	NumeroTituloCliente                  string           `json:"numeroTituloCliente"`
-	TextoMensagemBloquetoOcorrencia      string           `json:"textoMensagemBloquetoOcorrencia"`
-	Desconto                             Desconto         `json:"desconto"`
-	JurosMora                            JurosMora        `json:"jurosMora"`
-	Multa                                Multa            `json:"multa"`
-	Pagador                              Pagador          `json:"pagador"`
-	Avalista                             Avalista         `json:"avalista"`
-	Email                                string           `json:"email"`
-	QuantidadeDiasNegativacao            int              `json:"quantidadeDiasNegativacao"`
+	NumeroConvenio                       string            `json:"numeroConvenio"`
+	NumeroCarteira                       int               `json:"numeroCarteira"`
+	NumeroVariacaoCarteira               int               `json:"numeroVariacaoCarteira"`
+	CodigoModalidade                     CodigoModalidade  `json:"codigoModalidade"`
+	DataEmissao                          time.Time         `json:"dataEmissao"`
+	DataVencimento                       time.Time         `json:"dataVencimento"`
+	ValorOriginal                        float64           `json:"valorOriginal"`
+	ValorAbatimento                      float64           `json:"valorAbatimento"`
+	QuantidadeDiasProtesto               int               `json:"quantidadeDiasProtesto"`
+	IndicadorNumeroDiasLimiteRecebimento string            `json:"indicadorNumeroDiasLimiteRecebimento"`
+	NumeroDiasLimiteRecebimento          int               `json:"numeroDiasLimiteRecebimento"`
+	CodigoAceite                         CodigoAceite      `json:"codigoAceite"`
+	CodigoTipoTitulo                     string            `json:"codigoTipoTitulo"`
+	DescricaoTipoTitulo                  string            `json:"descricaoTipoTitulo"`
+	IndicadorPermissaoRecebimentoParcial string            `json:"indicadorPermissaoRecebimentoParcial"`
+	NumeroTituloBeneficiario             string            `json:"numeroTituloBeneficiario"`
+	CampoUtilizacaoBeneficiario          string            `json:"campoUtilizacaoBeneficiario"`
+	NumeroTituloCliente                  string            `json:"numeroTituloCliente"`
+	MensagemBloquetoOcorrencia           string            `json:"mensagemBloquetoOcorrencia"`
+	Desconto                             Desconto          `json:"desconto"`
+	JurosMora                            JurosMora         `json:"jurosMora"`
+	Multa                                Multa             `json:"multa"`
+	Pagador                              Pagador           `json:"pagador"`
+	BeneficiarioFinal                    BeneficiarioFinal `json:"beneficiarioFinal"`
+	Email                                string            `json:"email"`
+	IndicadorPix                         IndicadorPix      `json:"indicadorPix"`
 }
 
 func (b Boleto) Validate() error {
@@ -93,6 +93,13 @@ type RegistroBoleto struct {
 	} `json:"beneficiario"`
 	QuantidadeOcorrenciasNegativacao string `json:"quantidadeOcorrenciasNegativacao"`
 	//"listaOcorrenciasNegativacao": []
+	QrCode QrCode `json:"qrCode"`
+}
+
+type QrCode struct {
+	URL  string `json:"url"`
+	TxId string `json:"txId"`
+	Emv  string `json:"emv"`
 }
 
 // Desconto que será concedido no boleto
@@ -156,33 +163,33 @@ func (m Multa) MarshalJSON() ([]byte, error) {
 	})
 }
 
-type Avalista struct {
-	Nome           string       `json:"nomeRegistro"`
-	NumeroRegistro string       `json:"numeroRegistro"`
-	TipoRegistro   TipoRegistro `json:"tipoRegistro"`
+type BeneficiarioFinal struct {
+	Nome            string        `json:"nome"`
+	NumeroInscricao string        `json:"numeroInscricao"`
+	TipoInscricao   TipoInscricao `json:"tipoInscricao"`
 }
 
-func (a Avalista) MarshalJSON() ([]byte, error) {
-	type Alias Avalista
+func (b BeneficiarioFinal) MarshalJSON() ([]byte, error) {
+	type Alias BeneficiarioFinal
 	return json.Marshal(&struct {
 		Alias
-		Nome string `json:"nomeRegistro"`
+		Nome string `json:"nome"`
 	}{
-		Alias: (Alias)(a),
-		Nome:  substring(a.Nome, 30),
+		Alias: (Alias)(b),
+		Nome:  substring(b.Nome, 30),
 	})
 }
 
 type Pagador struct {
-	Nome           string       `json:"nome"`
-	NumeroRegistro string       `json:"numeroRegistro"`
-	TipoRegistro   TipoRegistro `json:"tipoRegistro"`
-	Telefone       string       `json:"telefone"`
-	Endereco       string       `json:"endereco"`
-	Bairro         string       `json:"bairro"`
-	CEP            string       `json:"cep"`
-	Cidade         string       `json:"cidade"`
-	UF             string       `json:"uf"`
+	Nome            string        `json:"nome"`
+	NumeroInscricao string        `json:"numeroInscricao"`
+	TipoInscricao   TipoInscricao `json:"tipoInscricao"`
+	Telefone        string        `json:"telefone"`
+	Endereco        string        `json:"endereco"`
+	Bairro          string        `json:"bairro"`
+	CEP             string        `json:"cep"`
+	Cidade          string        `json:"cidade"`
+	UF              string        `json:"uf"`
 }
 
 func (p Pagador) MarshalJSON() ([]byte, error) {
