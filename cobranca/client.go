@@ -55,7 +55,10 @@ func (c client) BaixarBoleto(numeroConvenio, nossoNumero string) (baixa RetornoB
 	if err != nil {
 		return
 	}
-	err = cobErr
+
+	if cobErr.Error() != "" {
+		err = cobErr
+	}
 	return
 }
 
@@ -81,7 +84,11 @@ func (c client) ListarBoletos(p ListaBoletosParams) (boletos BoletosListagem, er
 	if err != nil {
 		return
 	}
-	return boletos, cobErr
+	if cobErr.Error() != "" {
+		return boletos, cobErr
+	}
+	return boletos, nil
+
 }
 
 func (c client) RegistrarBoleto(b Boleto) (boleto RegistroBoleto, err error) {
@@ -114,6 +121,11 @@ func (c client) RegistrarBoleto(b Boleto) (boleto RegistroBoleto, err error) {
 	if err != nil {
 		return
 	}
+
+	if cobErr.Error() != "" {
+		return boleto, cobErr
+	}
+
 	return boleto, cobErr
 }
 
