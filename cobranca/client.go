@@ -2,6 +2,7 @@ package cobranca
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -126,7 +127,7 @@ func (c client) RegistrarBoleto(b Boleto) (boleto RegistroBoleto, err error) {
 		return boleto, cobErr
 	}
 
-	return boleto, cobErr
+	return boleto, errors.New(string(res.Body))
 }
 
 func (c client) endpoint() string {
