@@ -17,3 +17,18 @@ func (e *ErrorBB) Error() string {
 	}
 	return ""
 }
+
+type ErrosV1 struct {
+	Erros []struct {
+		Code    string `json:"codigo"`
+		Message string `json:"mensagem"`
+	} `json:"erros"`
+}
+
+func (e *ErrosV1) Error() string {
+	if len(e.Erros) > 0 {
+		f := e.Erros[0]
+		return f.Message
+	}
+	return ""
+}

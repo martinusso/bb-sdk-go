@@ -2,6 +2,7 @@ package cobranca
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -116,6 +117,12 @@ func (c client) RegistrarBoleto(b Boleto) (boleto RegistroBoleto, err error) {
 		return
 	}
 
+	var cobErros *bb.ErrosV1
+	err = json.Unmarshal(res.Body, &cobErros)
+	if err == nil && cobErros != nil && cobErros.Error() != "" {
+		return boleto, cobErros
+	}
+
 	var cobErr *bb.ErrorBB
 	err = json.Unmarshal(res.Body, &cobErr)
 	if err != nil {
@@ -126,7 +133,7 @@ func (c client) RegistrarBoleto(b Boleto) (boleto RegistroBoleto, err error) {
 		return boleto, cobErr
 	}
 
-	return boleto, cobErr
+	return boleto, errors.New(string(res.Body))
 }
 
 func (c client) endpoint() string {
